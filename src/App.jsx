@@ -56,6 +56,14 @@ function App() {
       </header>
 
       <div className="chat-box" ref={chatBoxRef}>
+        {messages.length === 0 && !loading && (
+          <div className="welcome-message">
+            <div className="welcome-icon">👋</div>
+            <h3>Welcome to Manoj Chatbot!</h3>
+            <p>How can I help you today? Feel free to ask me anything.</p>
+          </div>
+        )}
+        
         {messages.map((msg, i) => (
           <div
             key={i}
