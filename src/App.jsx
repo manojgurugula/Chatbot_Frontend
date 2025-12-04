@@ -22,19 +22,29 @@ function App() {
     setLoading(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      
       const res = await fetch("https://chatbot-backend-glac.onrender.com/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [{ role: "user", content: userMsg.content }],
         }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
 
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const data = await res.json();
 
       const botMsg = {
         role: "assistant",
-        content: data.response || "No response",
+        content: data.response || "Sorry, I couldn't generate a response. Please try again.",
       };
 
       setMessages((prev) => [...prev, botMsg]);
