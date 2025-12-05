@@ -20,12 +20,12 @@ function App() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
-
+//https://chatbot-backend-glac.onrender.com/api/chat
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
       
-      const res = await fetch("https://chatbot-backend-glac.onrender.com/api/chat", {
+      const res = await fetch("chatbotbackend-production-6097.up.railway.app/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
