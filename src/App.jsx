@@ -25,7 +25,7 @@ function App() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
       
-      const res = await fetch("chatbotbackend-production-6097.up.railway.app/api/chat", {
+      const res = await fetch("https://chatbot-backend-glac.onrender.com/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
