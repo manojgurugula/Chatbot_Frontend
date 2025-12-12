@@ -1,46 +1,53 @@
-name: Azure Static Web Apps CI/CD
+name: Build and Deploy Static Web App (manual Node)
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  build:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROUD_SMOKE_0C54CA610 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-          action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "build" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./    # adjust if app is in subfolder
+
+      - name: Build
+        run: npm run build
+        working-directory: ./    # adjust if app is in subfolder
+
+      - name: Upload built artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-dist
+          path: ./dist           # adjust if Vite outputs elsewhere
+
+  deploy:
     runs-on: ubuntu-latest
-    name: Close Pull Request Job
+    needs: build
     steps:
-      - name: Close Pull Request
-        id: closepullrequest
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-dist
+
+      # Deploy using the Azure Static Web Apps action but skip its internal build
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROUD_SMOKE_0C54CA610 }}
-          action: "close"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"                    # set to repo root or subfolder
+          api_location: ""                     # keep empty if backend is separate
+          app_artifact_location: "dist"        # the already-built artifact
+          skip_app_build: true
