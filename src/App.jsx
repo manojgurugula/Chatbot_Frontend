@@ -13,6 +13,28 @@ function App() {
     }
   }, [messages, loading]);
 
+  const formatMessage = (content) => {
+    if (!content) return content;
+    
+    // Convert markdown-style formatting to HTML
+    let formatted = content
+      // Headers
+      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+      // Bold text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Numbered lists
+      .replace(/^(\d+\.)\s+(.*)$/gm, '<div class="list-item numbered"><span class="number">$1</span>$2</div>')
+      // Bullet points
+      .replace(/^[*-]\s+(.*)$/gm, '<div class="list-item"><span class="bullet">•</span>$1</div>')
+      // Line breaks
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+    
+    return formatted;
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -20,6 +42,7 @@ function App() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
+    
 //https://chatbot-backend-glac.onrender.com/api/chat
     try {
       const controller = new AbortController();
@@ -79,7 +102,11 @@ function App() {
             key={i}
             className={`message ${msg.role === "user" ? "user" : "bot"}`}
           >
-            {msg.content}
+            {msg.role === "user" ? (
+              msg.content
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} />
+            )}
           </div>
         ))}
 
