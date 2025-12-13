@@ -133,7 +133,7 @@ function App() {
       </div>
       
       <footer className="footer">
-        © 2024 Manoj Chatbot - All Rights Reserved | Proprietary AI Technology by Manoj
+        © 2025 Manoj Chatbot
       </footer>
     </div>
   );
